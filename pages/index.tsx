@@ -1,6 +1,7 @@
 import { Listbox } from "@headlessui/react";
 import type { NextPage } from "next";
 import { Fragment, useCallback, useEffect, useState } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 interface Block {
   id: number;
@@ -34,82 +35,100 @@ const colorPatterns = [
   "bg-lime-300",
 ];
 const Home: NextPage = () => {
-  const [selectedPattern, setSelectedPattern] = useState<Pattern>(patterns[0]);
-  const [blocks, setBlocks] = useState<Block[]>([]);
-  useEffect(() => {
-    const arr = [];
-    for (let i = 0; i < selectedPattern.repeat; i++) {
-      arr.push({
-        id: i,
-        selected: (i + 1) % 10 === 0,
-        count: 4,
-      });
-    }
-    setBlocks(arr);
-  }, [selectedPattern]);
-  const changeState = useCallback(
-    (id: number): void => {
-      const target: Block | undefined = blocks.find((block) => block.id === id);
-      if (target) {
-        target.selected = true;
-        target.count++;
-        setBlocks([
-          ...blocks.filter((b) => b.id < id),
-          ...[target],
-          ...blocks.filter((b) => b.id > id),
-        ]);
-      }
-    },
-    [blocks]
-  );
+  const { data: session } = useSession();
+
+  if (session) {
+    return (
+      <>
+        Signed in as {session.user?.email} <br />
+        <button onClick={() => signOut()}>Sign Out</button>
+      </>
+    );
+  }
 
   return (
     <>
-      <div className="relative m-auto flex max-h-screen min-h-screen max-w-screen-2xl flex-1 flex-col flex-wrap content-center justify-center">
-        {blocks.map((block) => (
-          <div
-            key={block.id}
-            className={`-mt-[1px] -ml-[1px] box-border border border-zinc-300 last:bg-yellow-300 ${
-              selectedPattern.classes
-            } ${
-              block.selected
-                ? colorPatterns[block.count] ?? "bg-white"
-                : "bg-zinc-50"
-            }`}
-            onClick={() => {
-              changeState(block.id);
-            }}
-            onMouseEnter={() => {
-              changeState(block.id);
-            }}
-          ></div>
-        ))}
-        <div className="absolute -left-32 top-4 text-right">
-          <Listbox value={selectedPattern} onChange={setSelectedPattern}>
-            <Listbox.Button>{selectedPattern.name}</Listbox.Button>
-            <Listbox.Options>
-              {patterns.map((pattern) => (
-                <Listbox.Option key={pattern.id} value={pattern} as={Fragment}>
-                  {({ active, selected }) => (
-                    <li
-                      className={`${
-                        active
-                          ? "bg-blue-500 text-white"
-                          : "bg-white text-black"
-                      }`}
-                    >
-                      {selected && <>☑</>}
-                      {pattern.name}
-                    </li>
-                  )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Listbox>
-        </div>
-      </div>
+      Not signed in <br />
+      <button onClick={() => signIn()}>Sign in</button>
     </>
   );
+
+  // const [selectedPattern, setSelectedPattern] = useState<Pattern>(patterns[0]);
+  // const [blocks, setBlocks] = useState<Block[]>([]);
+  // useEffect(() => {
+  //   const arr = [];
+  //   for (let i = 0; i < selectedPattern.repeat; i++) {
+  //     arr.push({
+  //       id: i,
+  //       selected: (i + 1) % 10 === 0,
+  //       count: 4,
+  //     });
+  //   }
+  //   setBlocks(arr);
+  // }, [selectedPattern]);
+  // const changeState = useCallback(
+  //   (id: number): void => {
+  //     const target: Block | undefined = blocks.find((block) => block.id === id);
+  //     if (target) {
+  //       target.selected = true;
+  //       target.count++;
+  //       setBlocks([
+  //         ...blocks.filter((b) => b.id < id),
+  //         ...[target],
+  //         ...blocks.filter((b) => b.id > id),
+  //       ]);
+  //     }
+  //   },
+  //   [blocks]
+  // );
+
+  // return (
+  //   <>
+  //     <div className="relative m-auto flex max-h-screen min-h-screen max-w-screen-2xl flex-1 flex-col flex-wrap content-center justify-center">
+  //       {blocks.map((block) => (
+  //         <div
+  //           key={block.id}
+  //           className={`-mt-[1px] -ml-[1px] box-border border border-zinc-300 last:bg-yellow-300 ${
+  //             selectedPattern.classes
+  //           } ${
+  //             block.selected
+  //               ? colorPatterns[block.count] ?? "bg-white"
+  //               : "bg-zinc-50"
+  //           }`}
+  //           onClick={() => {
+  //             changeState(block.id);
+  //           }}
+  //           onMouseEnter={() => {
+  //             changeState(block.id);
+  //           }}
+  //         ></div>
+  //       ))}
+  //       <div className="absolute -left-32 top-4 text-right">
+  //         <Listbox value={selectedPattern} onChange={setSelectedPattern}>
+  //           <Listbox.Button>{selectedPattern.name}</Listbox.Button>
+  //           <Listbox.Options>
+  //             {patterns.map((pattern) => (
+  //               <Listbox.Option key={pattern.id} value={pattern} as={Fragment}>
+  //                 {({ active, selected }) => (
+  //                   <li
+  //                     className={`${
+  //                       active
+  //                         ? "bg-blue-500 text-white"
+  //                         : "bg-white text-black"
+  //                     }`}
+  //                   >
+  //                     {selected && <>☑</>}
+  //                     {pattern.name}
+  //                   </li>
+  //                 )}
+  //               </Listbox.Option>
+  //             ))}
+  //           </Listbox.Options>
+  //         </Listbox>
+  //       </div>
+  //     </div>
+  //   </>
+  // );
 };
 
 export default Home;
