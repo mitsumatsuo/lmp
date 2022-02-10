@@ -49,7 +49,13 @@ const Home: NextPage = () => {
   return (
     <>
       Not signed in <br />
-      <button onClick={() => signIn()}>Sign in</button>
+      <button
+        onClick={() =>
+          signIn("google", { callbackUrl: "http://192.168.11.27:3000/" })
+        }
+      >
+        Sign in
+      </button>
     </>
   );
 
